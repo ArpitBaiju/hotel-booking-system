@@ -1,9 +1,13 @@
-FROM maven:3.8.4-openjdk-17 AS build
-COPY . /app
+# Stage 1: Build the application
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY . .
 RUN mvn clean package -DskipTests
 
-FROM openjdk:17-jdk-slim
+# Stage 2: Run the application
+# We use eclipse-temurin because the old 'openjdk' images are deprecated
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
